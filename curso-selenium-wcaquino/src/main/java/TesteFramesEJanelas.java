@@ -1,4 +1,6 @@
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
@@ -7,12 +9,23 @@ import org.openqa.selenium.chrome.ChromeDriver;
 
 public class TesteFramesEJanelas {
 
+    private WebDriver driver;
+
+    @BeforeEach
+    public void inicializa() {
+        System.setProperty("webdriver.chrome.driver","driver/chromedriver.exe");
+        driver = new ChromeDriver();
+        driver.get("file:///" + System.getProperty("user.dir") + "/src/main/resources/componentes.html");
+        driver.manage().window().maximize();
+    }
+
+    @AfterEach
+    public void finaliza() {
+        driver.quit();
+    }
+
     @Test
     public void deveInteragirComFrames() {
-        System.setProperty("webdriver.chrome.driver", "driver/chromedriver.exe");
-        WebDriver driver = new ChromeDriver();
-        driver.get("file:///" + System.getProperty("user.dir") + "/src/main/resources/componentes.html");
-
         driver.switchTo().frame("frame1");
         driver.findElement(By.id("frameButton")).click();
 
@@ -28,10 +41,6 @@ public class TesteFramesEJanelas {
 
     @Test
     public void deveInteragirComJanelas() {
-        System.setProperty("webdriver.chrome.driver", "driver/chromedriver.exe");
-        WebDriver driver = new ChromeDriver();
-        driver.get("file:///" + System.getProperty("user.dir") + "/src/main/resources/componentes.html");
-
         driver.findElement(By.id("buttonPopUpEasy")).click();
         driver.switchTo().window("Popup");
         driver.findElement(By.tagName("textarea")).sendKeys("Deu certo?");
@@ -46,10 +55,6 @@ public class TesteFramesEJanelas {
 
     @Test
     public void deveInteragirComJanelasSemTitulo() {
-        System.setProperty("webdriver.chrome.driver", "driver/chromedriver.exe");
-        WebDriver driver = new ChromeDriver();
-        driver.get("file:///" + System.getProperty("user.dir") + "/src/main/resources/componentes.html");
-
         driver.findElement(By.id("buttonPopUpHard")).click();
         System.out.println(driver.getWindowHandle());
         System.out.println(driver.getWindowHandles());
@@ -63,7 +68,5 @@ public class TesteFramesEJanelas {
         String msg2 = "e agora?";
         driver.findElement(By.tagName("textarea")).sendKeys(msg2);
         Assertions.assertEquals(msg2, driver.findElement(By.id("elementosForm:sugestoes")).getAttribute("value"));
-
-        driver.quit();
     }
 }
