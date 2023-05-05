@@ -2,7 +2,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -10,6 +9,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 public class TesteFramesEJanelas {
 
     private WebDriver driver;
+    private DSL dsl;
 
     @BeforeEach
     public void inicializa() {
@@ -17,6 +17,7 @@ public class TesteFramesEJanelas {
         driver = new ChromeDriver();
         driver.get("file:///" + System.getProperty("user.dir") + "/src/main/resources/componentes.html");
         driver.manage().window().maximize();
+        dsl = new DSL(driver);
     }
 
     @AfterEach
@@ -26,47 +27,40 @@ public class TesteFramesEJanelas {
 
     @Test
     public void deveInteragirComFrames() {
-        driver.switchTo().frame("frame1");
-        driver.findElement(By.id("frameButton")).click();
-
-        Alert alert = driver.switchTo().alert();
-        String msg = alert.getText();
-        Assertions.assertEquals("Frame OK!", msg);
-        alert.accept();
-
-        driver.switchTo().defaultContent();
-        driver.findElement(By.id("elementosForm:nome")).sendKeys(msg);
-        Assertions.assertEquals(msg, driver.findElement(By.id("elementosForm:nome")).getAttribute("value"));
+        dsl.entrarFrame("frame1");
+        dsl.clicarBotao("frameButton");
+        String texto = dsl.alertaObterTextoEAceita();
+        Assertions.assertEquals("Frame OK!", texto);
+        dsl.sairFrame();
+        dsl.escrever("elementosForm:nome", texto);
+        Assertions.assertEquals(texto, dsl.obterValorElemento(("elementosForm:nome")));
     }
 
     @Test
     public void deveInteragirComJanelas() {
-        driver.findElement(By.id("buttonPopUpEasy")).click();
-        driver.switchTo().window("Popup");
-        driver.findElement(By.tagName("textarea")).sendKeys("Deu certo?");
+        dsl.clicarBotao("buttonPopUpEasy");
+        dsl.trocarJanela("Popup");
+        dsl.escrever(By.tagName("textarea"), "Deu certo?");
         driver.close();
-
-        driver.switchTo().window("");
+        dsl.trocarJanela("");
         String msg = "e agora?";
-        driver.findElement(By.id("elementosForm:sugestoes")).sendKeys(msg);
-
-        Assertions.assertEquals(msg, driver.findElement(By.id("elementosForm:sugestoes")).getAttribute("value"));
+        dsl.escrever("elementosForm:sugestoes", msg);
+        Assertions.assertEquals(msg,  dsl.obterValorElemento("elementosForm:sugestoes"));
     }
 
     @Test
     public void deveInteragirComJanelasSemTitulo() {
-        driver.findElement(By.id("buttonPopUpHard")).click();
+        dsl.clicarBotao("buttonPopUpHard");
         System.out.println(driver.getWindowHandle());
         System.out.println(driver.getWindowHandles());
-
-        driver.switchTo().window((String) driver.getWindowHandles().toArray()[1]);
+        dsl.trocarJanela((String) driver.getWindowHandles().toArray()[1]);
         String msg1 = "Deu certo?";
-        driver.findElement(By.tagName("textarea")).sendKeys(msg1);
-        Assertions.assertEquals(msg1, driver.findElement(By.tagName("textarea")).getAttribute("value"));
+        dsl.escrever(By.tagName("textarea"), msg1);
+        Assertions.assertEquals(msg1, dsl.obterValorCampo(By.tagName("textarea")));
 
-        driver.switchTo().window((String) driver.getWindowHandles().toArray()[0]);
+        dsl.trocarJanela((String) driver.getWindowHandles().toArray()[0]);
         String msg2 = "e agora?";
-        driver.findElement(By.tagName("textarea")).sendKeys(msg2);
-        Assertions.assertEquals(msg2, driver.findElement(By.id("elementosForm:sugestoes")).getAttribute("value"));
+        dsl.escrever(By.tagName("textarea"), msg2);
+        Assertions.assertEquals(msg2, dsl.obterValorCampo(By.id("elementosForm:sugestoes")));
     }
 }
