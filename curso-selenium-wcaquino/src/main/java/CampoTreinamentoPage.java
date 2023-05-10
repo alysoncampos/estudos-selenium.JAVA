@@ -28,6 +28,10 @@ public class CampoTreinamentoPage {
         dsl.clicarRadio("elementosForm:comidaFavorita:0");
     }
 
+    public void setComidaPizza() {
+        dsl.clicarRadio("elementosForm:comidaFavorita:2");
+    }
+
     public void setComidaVegetariano() {
         dsl.clicarRadio("elementosForm:comidaFavorita:3");
     }
